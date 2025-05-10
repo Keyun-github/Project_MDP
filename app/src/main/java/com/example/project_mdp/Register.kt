@@ -1,14 +1,17 @@
 package com.example.project_mdp
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.telecom.Call
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-
+import androidx.appcompat.app.AppCompatActivity
+import com.example.project_mdp.api.ApiClient
+import com.example.project_mdp.model.RegisterRequest
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import javax.security.auth.callback.Callback
 
 class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,17 +25,32 @@ class RegisterActivity : AppCompatActivity() {
         val btnRegister = findViewById<Button>(R.id.btnRegister)
 
         btnRegister.setOnClickListener {
-            val name = edtName.text.toString()
-            val email = edtEmail.text.toString()
-            val password = edtPassword.text.toString()
-            val confirmPassword = edtConfirmPassword.text.toString()
+            val name = edtName.text.toString().trim()
+            val email = edtEmail.text.toString().trim()
+            val password = edtPassword.text.toString().trim()
+            val confirmPassword = edtConfirmPassword.text.toString().trim()
 
-            if (password == confirmPassword) {
-                // Perform registration logic here
-                Toast.makeText(this, "Registration Successful!", Toast.LENGTH_SHORT).show()
-            } else {
+            if (password != confirmPassword) {
                 Toast.makeText(this, "Passwords do not match!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            val request = RegisterRequest(name, email, password, confirmPassword)
+
+            ApiClient.instance.registerUser(request)
+                .enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@RegisterActivity, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@RegisterActivity, "Register Failed: ${response.code()}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Toast.makeText(this@RegisterActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
         }
     }
 }
