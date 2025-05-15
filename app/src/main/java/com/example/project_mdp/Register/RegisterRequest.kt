@@ -1,4 +1,4 @@
-package com.example.project_mdp
+package com.example.project_mdp.Register
 
 data class RegisterRequest(
     val namaLengkap: String,

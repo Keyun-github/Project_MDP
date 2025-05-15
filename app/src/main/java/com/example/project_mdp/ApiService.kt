@@ -1,6 +1,8 @@
 package com.example.project_mdp
 
-import com.example.project_mdp.RegisterRequest
+import com.example.project_mdp.Login.LoginRequest
+import com.example.project_mdp.Login.LoginResponse
+import com.example.project_mdp.Register.RegisterRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST

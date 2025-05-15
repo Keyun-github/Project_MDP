@@ -21,12 +21,21 @@ router.post('/register', async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: 'Email sudah terdaftar' });
 
+    // Tentukan role berdasarkan email
+    let role = 'donatur'; // default
+    if (email === 'master@gmail.com' && password === '12345678') {
+      role = 'admin';
+    } else if (email === 'pengalang@gmail.com' && password === '12345678') {
+      role = 'organisasi';
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       namaLengkap,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role
     });
 
     await newUser.save();
@@ -53,7 +62,7 @@ router.post('/login', async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: 'Password salah' });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '1d'
     });
 
@@ -63,7 +72,8 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         namaLengkap: user.namaLengkap,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (err) {
