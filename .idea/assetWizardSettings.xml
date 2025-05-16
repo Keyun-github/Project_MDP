@@ -3,6 +3,11 @@
   <component name="WizardSettings">
     <option name="children">
       <map>
+        <entry key="imageWizard">
+          <value>
+            <PersistentState />
+          </value>
+        </entry>
         <entry key="vectorWizard">
           <value>
             <PersistentState>
@@ -28,7 +33,7 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="search_background" />
+                            <entry key="outputName" value="search_box_bg" />
                             <entry key="sourceFile" value="D:\proyekpad\Project_MDP" />
                           </map>
                         </option>

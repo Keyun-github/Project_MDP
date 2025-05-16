@@ -21,13 +21,19 @@ router.post('/register', async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: 'Email sudah terdaftar' });
 
-    // Tentukan role berdasarkan email
-    let role = 'donatur'; // default
+    // Tentukan role
+    let role = 'donatur';
     if (email === 'master@gmail.com' && password === '12345678') {
       role = 'admin';
     } else if (email === 'pengalang@gmail.com' && password === '12345678') {
       role = 'organisasi';
     }
+
+    // Ambil jumlah user sesuai role
+    const rolePrefix = role === 'donatur' ? 'D' : role === 'organisasi' ? 'O' : 'A';
+    const count = await User.countDocuments({ role });
+    const nextNumber = (count + 1).toString().padStart(3, '0'); // 001, 002
+    const customId = `${rolePrefix}${nextNumber}`;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -35,16 +41,19 @@ router.post('/register', async (req, res) => {
       namaLengkap,
       email,
       password: hashedPassword,
-      role
+      role,
+      customId
     });
 
     await newUser.save();
 
     res.status(201).json({ message: 'Registrasi berhasil' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Terjadi kesalahan server' });
   }
 });
+
 
 // LOGIN
 router.post('/login', async (req, res) => {
@@ -78,6 +87,40 @@ router.post('/login', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ message: 'Terjadi kesalahan server' });
+  }
+});
+//get
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '-password'); // sembunyikan password
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal mengambil data user' });
+  }
+});
+//update 
+router.put('/users/:id', async (req, res) => {
+  const { namaLengkap, email, role } = req.body;
+
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { namaLengkap, email, role },
+      { new: true }
+    );
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal mengupdate user' });
+  }
+});
+
+//delete
+router.delete('/users/:id', async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ message: 'User berhasil dihapus' });
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal menghapus user' });
   }
 });
 
